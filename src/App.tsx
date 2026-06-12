@@ -6,6 +6,7 @@ import { subscribeUserPredictions } from './lib/predictions';
 import type { Prediction } from './lib/predictions';
 import { MatchCard } from './components/MatchCard';
 import { PredictionModal } from './components/PredictionModal';
+import { Leaderboard } from './components/Leaderboard';
 
 function groupByDate(matches: Match[]): [string, Match[]][] {
   const map = new Map<string, Match[]>();
@@ -19,12 +20,15 @@ function groupByDate(matches: Match[]): [string, Match[]][] {
   return Array.from(map.entries());
 }
 
+type View = 'matches' | 'leaderboard';
+
 function App() {
   const auth = useAuthProvider();
   const [matches, setMatches] = useState<Match[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [selected, setSelected] = useState<Match | null>(null);
   const [loadingMatches, setLoadingMatches] = useState(true);
+  const [view, setView] = useState<View>('matches');
 
   useEffect(() => {
     return subscribeMatches((m) => {
@@ -39,6 +43,7 @@ function App() {
   }, [auth.user]);
 
   const predMap = new Map(predictions.map((p) => [p.matchId, p]));
+  const matchMap = new Map(matches.map((m) => [m.id, m]));
 
   if (auth.loading) {
     return (
@@ -89,6 +94,32 @@ function App() {
           )}
         </header>
 
+        {/* Tabs */}
+        {auth.user && (
+          <div className="flex gap-1 bg-slate-800 rounded-xl p-1 mb-6">
+            <button
+              onClick={() => setView('matches')}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                view === 'matches'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Matches
+            </button>
+            <button
+              onClick={() => setView('leaderboard')}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                view === 'leaderboard'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Leaderboard
+            </button>
+          </div>
+        )}
+
         {/* Match list */}
         {!auth.user ? (
           <div className="text-center py-16">
@@ -102,6 +133,8 @@ function App() {
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : view === 'leaderboard' ? (
+          <Leaderboard matchMap={matchMap} />
         ) : (
           <div className="space-y-8">
             {groupByDate(matches).map(([date, dayMatches]) => (

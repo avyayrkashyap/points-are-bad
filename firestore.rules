@@ -19,7 +19,8 @@ service cloud.firestore {
       allow read: if
         request.auth != null && (
           resource.data.userId == request.auth.uid ||
-          exists(/databases/$(database)/documents/predictions/$(request.auth.uid + '_' + resource.data.matchId))
+          exists(/databases/$(database)/documents/predictions/$(request.auth.uid + '_' + resource.data.matchId)) ||
+          get(/databases/$(database)/documents/matches/$(resource.data.matchId)).data.keys().hasAll(['actualScore1'])
         );
 
       // Create: must be your own, document ID must follow the userId_matchId pattern,

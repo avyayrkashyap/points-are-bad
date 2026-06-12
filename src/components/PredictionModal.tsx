@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Match } from '../lib/matches';
 import type { Prediction } from '../lib/predictions';
 import { submitPrediction, subscribeMatchPredictions } from '../lib/predictions';
+import { calcPoints, pointsLabel } from '../lib/scoring';
 import { useAuth } from '../lib/useAuth';
 
 interface Props {
@@ -162,9 +163,19 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                           <span className="ml-2 text-xs text-emerald-400">(you)</span>
                         )}
                       </span>
-                      <span className="text-lg font-black text-white tabular-nums">
-                        {p.score1} – {p.score2}
-                      </span>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-lg font-black text-white tabular-nums">
+                          {p.score1} – {p.score2}
+                        </span>
+                        {(() => {
+                          const pts = calcPoints(p, match);
+                          return pts !== null ? (
+                            <span className={`text-xs font-bold ${pts === 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                              {pointsLabel(pts)}
+                            </span>
+                          ) : null;
+                        })()}
+                      </div>
                     </li>
                   ))}
               </ul>
