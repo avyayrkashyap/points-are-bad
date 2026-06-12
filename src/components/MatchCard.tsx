@@ -92,11 +92,13 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           {state === 'finished' ? (
             <>
               <span className="text-5xl font-black text-gray-900 tabular-nums">{match.actualScore1}</span>
+              <span className="text-4xl font-black text-gray-300 mx-1">-</span>
               <span className="text-5xl font-black text-gray-900 tabular-nums">{match.actualScore2}</span>
             </>
           ) : state === 'submitted' && myPrediction ? (
             <>
               <span className="text-5xl font-black text-gray-900 tabular-nums">{myPrediction.score1}</span>
+              <span className="text-4xl font-black text-gray-300 mx-1">-</span>
               <span className="text-5xl font-black text-gray-900 tabular-nums">{myPrediction.score2}</span>
             </>
           ) : state === 'open' ? (
