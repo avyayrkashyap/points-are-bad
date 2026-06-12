@@ -12,7 +12,6 @@ interface Props {
 interface UserRow {
   userId: string;
   userName: string;
-  userPhoto: string;
   totalPoints: number;
   matchesScored: number;
 }
@@ -34,7 +33,7 @@ export function Leaderboard({ matchMap }: Props) {
     return (
       <div className="text-center py-20">
         <p className="text-4xl mb-4">⏳</p>
-        <p className="text-gray-800 font-bold text-lg mb-1">No results yet</p>
+        <p className="font-bold text-lg mb-1 text-gray-900">No results yet</p>
         <p className="text-sm text-gray-500">
           Leaderboard updates once matches have final scores.
         </p>
@@ -58,7 +57,6 @@ export function Leaderboard({ matchMap }: Props) {
       userMap.set(pred.userId, {
         userId: pred.userId,
         userName: pred.userName,
-        userPhoto: pred.userPhoto,
         totalPoints: pts,
         matchesScored: 1,
       });
@@ -73,7 +71,7 @@ export function Leaderboard({ matchMap }: Props) {
     return (
       <div className="text-center py-20">
         <p className="text-4xl mb-4">📋</p>
-        <p className="text-gray-800 font-bold text-lg mb-1">No predictions yet</p>
+        <p className="font-bold text-lg mb-1 text-gray-900">No predictions yet</p>
         <p className="text-sm text-gray-500">
           Be the first to predict a finished match.
         </p>
@@ -82,51 +80,74 @@ export function Leaderboard({ matchMap }: Props) {
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs text-gray-400 text-center mb-4 font-medium">
-        Lower is better · {finishedMatchIds.length} match{finishedMatchIds.length !== 1 ? 'es' : ''} scored
-      </p>
+    <div className="px-1 pt-4 pb-2 flex flex-col gap-0.5">
       {rows.map((row, i) => {
         const isMe = row.userId === user?.uid;
-        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
+        const ptsPerGame = row.matchesScored > 0
+          ? (row.totalPoints / row.matchesScored).toFixed(1)
+          : '–';
 
         return (
           <div
             key={row.userId}
-            className={`flex items-center gap-3 rounded-2xl px-4 py-3 border-2 ${
-              isMe
-                ? 'bg-yellow-50 border-yellow-300'
-                : 'bg-white border-gray-100'
-            }`}
+            className={`flex items-center rounded-full px-3 ${isMe ? 'bg-yellow-300' : ''}`}
+            style={{ minHeight: '44px' }}
           >
-            <span className="w-6 text-center text-sm font-bold text-gray-400">
-              {medal ?? i + 1}
-            </span>
-            <img
-              src={
-                row.userPhoto ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(row.userName)}&background=f5c842&color=111`
-              }
-              alt={row.userName}
-              className="w-8 h-8 rounded-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(row.userName)}&background=f5c842&color=111`;
-              }}
-            />
-            <span className="flex-1 text-sm font-semibold text-gray-900 truncate">
+            {/* Rank */}
+            <div className="w-8 flex-shrink-0 flex items-center justify-center">
+              <span
+                className="font-['Lexend'] font-black text-sm tracking-tight"
+                style={{ color: isMe ? '#0A0A0A' : '#CCCCCC' }}
+              >
+                {i + 1}
+              </span>
+            </div>
+
+            {/* Name */}
+            <span
+              className="flex-1 font-['Lexend'] font-bold text-[15px] leading-5 truncate"
+              style={{ color: '#0A0A0A' }}
+            >
               {row.userName}
-              {isMe && <span className="ml-2 text-xs text-yellow-600 font-bold">(you)</span>}
             </span>
-            <div className="text-right">
-              <span className="text-xl font-black text-gray-900 tabular-nums">
+
+            {/* Pts/game badge */}
+            <div
+              className="w-[72px] flex-shrink-0 flex items-center justify-center rounded px-1 py-0.5"
+              style={{ backgroundColor: isMe ? '#D7AF3A' : '#F6F6F6' }}
+            >
+              <span
+                className="font-['Lexend'] font-medium text-xs tracking-tight"
+                style={{ color: isMe ? '#0A0A0A' : '#888888' }}
+              >
+                {ptsPerGame}/game
+              </span>
+            </div>
+
+            {/* Total pts */}
+            <div
+              className="w-[60px] flex-shrink-0 flex items-center justify-end gap-1 pl-2"
+            >
+              <span
+                className="font-['Lexend'] font-normal text-base tracking-tight leading-8"
+                style={{ color: '#0A0A0A' }}
+              >
                 {row.totalPoints}
               </span>
-              <span className="text-xs text-gray-400 ml-1">pts</span>
-              <div className="text-xs text-gray-400">{row.matchesScored} match{row.matchesScored !== 1 ? 'es' : ''}</div>
+              <span
+                className="font-['Lexend'] font-normal text-xs tracking-tight leading-8"
+                style={{ color: isMe ? '#7A6201' : '#CCCCCC' }}
+              >
+                pts
+              </span>
             </div>
           </div>
         );
       })}
+
+      <p className="text-center text-xs text-gray-400 mt-4 font-medium">
+        {finishedMatchIds.length} match{finishedMatchIds.length !== 1 ? 'es' : ''} scored · lower is better
+      </p>
     </div>
   );
 }
