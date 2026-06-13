@@ -91,9 +91,9 @@ function App() {
 
   return (
     <AuthContext.Provider value={auth}>
-      <div className="min-h-screen max-w-lg mx-auto px-4 py-6 pb-24">
+      <div className="min-h-screen max-w-lg mx-auto px-4 pb-24">
         {/* Header */}
-        <header className="flex items-center justify-between bg-yellow-300 rounded-2xl px-5 py-3 mb-6">
+        <header className="sticky top-4 z-30 flex items-center justify-between bg-yellow-300 rounded-2xl px-5 py-3 mb-6 mt-4">
           <h1 className="text-xl font-black text-gray-900 leading-tight">
             Points <span className="font-normal">'R'</span> Bad
           </h1>
