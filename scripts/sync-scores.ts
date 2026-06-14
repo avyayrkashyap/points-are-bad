@@ -54,12 +54,10 @@ async function fetchFinishedMatches(): Promise<ApiMatch[]> {
   return data.matches;
 }
 
-const MISS_PENALTY = 5;
-
 async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map<string, { home: number; away: number }>) {
   console.log('Recomputing leaderboard...');
 
-  // Fetch match dates so we know the kickoff time of every finished match
+  // Fetch match dates
   const matchesSnap = await db.collection('matches').get();
   const matchDates = new Map<string, Date>();
   for (const doc of matchesSnap.docs) {
@@ -70,15 +68,34 @@ async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map
   // Fetch all predictions
   const predsSnap = await db.collection('predictions').get();
 
-  // Group predictions by user: userId -> matchId -> { score1, score2 }
+  // Group predictions by user and by match
   const userPreds = new Map<string, Map<string, { score1: number; score2: number }>>();
   const userInfo = new Map<string, { displayName: string; photoURL: string }>();
+  const matchPreds = new Map<string, Array<{ score1: number; score2: number }>>();
 
   for (const doc of predsSnap.docs) {
     const p = doc.data();
     if (!userPreds.has(p.userId)) userPreds.set(p.userId, new Map());
     userPreds.get(p.userId)!.set(p.matchId, { score1: p.score1, score2: p.score2 });
     userInfo.set(p.userId, { displayName: p.userName ?? 'Anonymous', photoURL: p.userPhoto ?? '' });
+    if (!matchPreds.has(p.matchId)) matchPreds.set(p.matchId, []);
+    matchPreds.get(p.matchId)!.push({ score1: p.score1, score2: p.score2 });
+  }
+
+  // For each finished match, compute the penalty (worst score among predictors + 2)
+  const matchPenalty = new Map<string, number>();
+  for (const matchId of finishedMatchIds) {
+    const score = scoreMap.get(matchId);
+    if (!score) continue;
+    const preds = matchPreds.get(matchId) ?? [];
+    if (preds.length === 0) {
+      matchPenalty.set(matchId, 7); // fallback if nobody predicted
+    } else {
+      const maxPts = Math.max(...preds.map(p =>
+        Math.abs(p.score1 - score.home) + Math.abs(p.score2 - score.away)
+      ));
+      matchPenalty.set(matchId, maxPts + 2);
+    }
   }
 
   // Compute totals per user
@@ -86,7 +103,7 @@ async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map
   let usersUpdated = 0;
 
   for (const [userId, preds] of userPreds) {
-    // Find the kickoff date of the user's earliest-ever prediction
+    // Find the kickoff date of the user's earliest prediction
     let firstMatchDate: Date | null = null;
     for (const matchId of preds.keys()) {
       const d = matchDates.get(matchId);
@@ -100,18 +117,15 @@ async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map
     for (const matchId of finishedMatchIds) {
       const score = scoreMap.get(matchId);
       if (!score) continue;
-
       const matchDate = matchDates.get(matchId);
       if (!matchDate) continue;
-
-      // Only penalise misses on or after the user's first prediction
-      if (matchDate < firstMatchDate) continue;
+      if (matchDate < firstMatchDate) continue; // before they joined
 
       const pred = preds.get(matchId);
       if (pred) {
         totalPoints += Math.abs(pred.score1 - score.home) + Math.abs(pred.score2 - score.away);
       } else {
-        totalPoints += MISS_PENALTY; // missed match penalty
+        totalPoints += matchPenalty.get(matchId) ?? 7; // worst score + 2
       }
       matchesScored += 1;
     }
@@ -128,7 +142,7 @@ async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map
   }
 
   await batch.commit();
-  console.log(`Leaderboard updated for ${usersUpdated} users (miss penalty: +${MISS_PENALTY}pts).`);
+  console.log(`Leaderboard updated for ${usersUpdated} users (miss penalty: worst score + 2).`);
 }
 
 async function syncScores() {
