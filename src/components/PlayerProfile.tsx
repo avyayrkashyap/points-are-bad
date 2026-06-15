@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
 import type { LeaderboardEntry } from '../lib/leaderboard';
 
@@ -135,12 +135,17 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
                 ) : (
                   <ResponsiveContainer width="100%" height={220}>
                     <AreaChart
-                      data={(player.matchHistory ?? []).map((m, i) => ({ game: i + 1, pts: m.pts, miss: m.miss }))}
+                      data={(player.matchHistory ?? []).reduce<{ game: number; pts: number; avg: number; miss: boolean }[]>((acc, m, i) => {
+                        const prevTotal = acc[i - 1] ? acc[i - 1].avg * i : 0;
+                        const avg = parseFloat(((prevTotal + m.pts) / (i + 1)).toFixed(2));
+                        acc.push({ game: i + 1, pts: m.pts, avg, miss: m.miss });
+                        return acc;
+                      }, [])}
                       margin={{ top: 10, right: 16, bottom: 0, left: -20 }}
                     >
                       <defs>
                         <linearGradient id="ptsFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#F5C842" stopOpacity={0.4} />
+                          <stop offset="5%" stopColor="#F5C842" stopOpacity={0.3} />
                           <stop offset="95%" stopColor="#F5C842" stopOpacity={0} />
                         </linearGradient>
                       </defs>
@@ -160,17 +165,11 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
                       />
                       <Tooltip
                         contentStyle={{ fontFamily: 'Lexend, sans-serif', fontSize: 12, borderRadius: 8, border: '1px solid #EEE' }}
-                        formatter={(val, _name, entry) => [
-                          (entry.payload as { miss: boolean }).miss ? `${val} pts (missed)` : `${val} pts`,
-                          '',
-                        ]}
+                        formatter={(val, name, entry) => {
+                          if (name === 'avg') return [`${val} avg`, 'Rolling avg'];
+                          return [(entry.payload as { miss: boolean }).miss ? `${val} pts (missed)` : `${val} pts`, 'This game'];
+                        }}
                         labelFormatter={(label) => `Game ${label}`}
-                      />
-                      <ReferenceLine
-                        y={player.matchesScored > 0 ? player.totalPoints / player.matchesScored : 0}
-                        stroke="#F5C842"
-                        strokeDasharray="4 3"
-                        strokeWidth={1.5}
                       />
                       <Area
                         type="monotone"
@@ -192,6 +191,15 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
                             />
                           );
                         }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="avg"
+                        stroke="#0A0A0A"
+                        strokeWidth={1.5}
+                        strokeDasharray="4 3"
+                        fill="none"
+                        dot={false}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
