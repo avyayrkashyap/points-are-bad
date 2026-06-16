@@ -43,15 +43,16 @@ function App() {
     window.scrollTo({ top, behavior: 'smooth' });
   }
 
-  // Scroll to today (or nearest upcoming day) on initial load
+  // Scroll to today whenever the matches tab becomes active
   useEffect(() => {
+    if (view !== 'matches') return;
     if (dayGroups.length === 0) return;
     const now = new Date();
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const target = dayGroups.find((g) => g.dateKey >= todayKey);
     if (!target) return;
     requestAnimationFrame(() => scrollToDay(target.dateKey));
-  }, [dayGroups.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [view, dayGroups.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
 if (auth.loading) {
     return (
