@@ -7,18 +7,7 @@ import type { Prediction } from './lib/predictions';
 import { MatchCard } from './components/MatchCard';
 import { PredictionModal } from './components/PredictionModal';
 import { Leaderboard } from './components/Leaderboard';
-
-function groupByDate(matches: Match[]): [string, Match[]][] {
-  const map = new Map<string, Match[]>();
-  for (const m of matches) {
-    const key = m.date.toLocaleDateString(undefined, {
-      weekday: 'long', month: 'long', day: 'numeric',
-    });
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(m);
-  }
-  return Array.from(map.entries());
-}
+import { CalendarBar, buildDayGroups } from './components/CalendarBar';
 
 function getOpenMatches(matches: Match[], predMap: Map<string, Prediction>): Match[] {
   const now = new Date();
@@ -55,18 +44,25 @@ function App() {
 
   const predMap = new Map(predictions.map((p) => [p.matchId, p]));
   const openMatches = getOpenMatches(matches, predMap);
+  const dayGroups = buildDayGroups(matches);
 
-  // Scroll to the next upcoming match on initial load
+  function scrollToDay(dateKey: string) {
+    const el = document.getElementById(`day-${dateKey}`);
+    if (!el) return;
+    const headerHeight = 80;
+    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  // Scroll to today (or nearest upcoming day) on initial load
   useEffect(() => {
-    if (matches.length === 0) return;
+    if (dayGroups.length === 0) return;
     const now = new Date();
-    const next = matches.find((m) => m.date > now);
-    if (!next) return;
-    // Let the DOM render first
-    requestAnimationFrame(() => {
-      document.getElementById(`match-${next.id}`)?.scrollIntoView({ behavior: 'instant', block: 'start' });
-    });
-  }, [matches.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const target = dayGroups.find((g) => g.dateKey >= todayKey);
+    if (!target) return;
+    requestAnimationFrame(() => scrollToDay(target.dateKey));
+  }, [dayGroups.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function jumpToNextPrediction() {
     if (openMatches.length === 0) return;
@@ -91,7 +87,7 @@ function App() {
 
   return (
     <AuthContext.Provider value={auth}>
-      <div className="min-h-screen max-w-lg mx-auto px-4 pb-24">
+      <div className="min-h-screen max-w-lg mx-auto px-4 pb-32">
         {/* Header */}
         <header className="sticky top-4 z-30 flex items-center justify-between bg-yellow-300 rounded-2xl px-5 py-3 mb-6 mt-4">
           <h1 className="text-xl font-black text-gray-900 leading-tight">
@@ -162,13 +158,15 @@ function App() {
           <Leaderboard />
         ) : (
           <div className="space-y-8">
-            {groupByDate(matches).map(([date, dayMatches]) => (
-              <section key={date}>
+            {dayGroups.map((g) => (
+              <section key={g.dateKey} id={`day-${g.dateKey}`}>
                 <h2 className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3 px-1">
-                  {date}
+                  {g.matches[0].date.toLocaleDateString(undefined, {
+                    weekday: 'long', month: 'long', day: 'numeric',
+                  })}
                 </h2>
                 <div className="space-y-3">
-                  {dayMatches.map((m) => (
+                  {g.matches.map((m) => (
                     <div key={m.id} id={`match-${m.id}`}>
                       <MatchCard
                         match={m}
@@ -183,6 +181,15 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Calendar bar */}
+      {auth.user && view === 'matches' && (
+        <CalendarBar
+          groups={dayGroups}
+          predMap={predMap}
+          onSelectDay={scrollToDay}
+        />
+      )}
 
       {/* Floating "predictions left" button */}
       {auth.user && view === 'matches' && openMatches.length > 0 && (
