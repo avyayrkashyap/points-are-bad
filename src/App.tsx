@@ -9,16 +9,6 @@ import { PredictionModal } from './components/PredictionModal';
 import { Leaderboard } from './components/Leaderboard';
 import { CalendarBar, buildDayGroups } from './components/CalendarBar';
 
-function getOpenMatches(matches: Match[], predMap: Map<string, Prediction>): Match[] {
-  const now = new Date();
-  const threeDays = 3 * 24 * 60 * 60 * 1000;
-  return matches.filter((m) => {
-    if (m.actualScore1 != null) return false;       // finished
-    if (predMap.has(m.id)) return false;             // already predicted
-    if (now >= m.date) return false;                 // kicked off already
-    return m.date.getTime() - now.getTime() <= threeDays;
-  });
-}
 
 type View = 'matches' | 'leaderboard';
 
@@ -43,7 +33,6 @@ function App() {
   }, [auth.user]);
 
   const predMap = new Map(predictions.map((p) => [p.matchId, p]));
-  const openMatches = getOpenMatches(matches, predMap);
   const dayGroups = buildDayGroups(matches);
 
   function scrollToDay(dateKey: string) {
@@ -64,20 +53,7 @@ function App() {
     requestAnimationFrame(() => scrollToDay(target.dateKey));
   }, [dayGroups.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function jumpToNextPrediction() {
-    if (openMatches.length === 0) return;
-    const next = openMatches[0];
-    const el = document.getElementById(`match-${next.id}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Small delay so scroll completes before modal opens
-      setTimeout(() => setSelected(next), 300);
-    } else {
-      setSelected(next);
-    }
-  }
-
-  if (auth.loading) {
+if (auth.loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -189,34 +165,6 @@ function App() {
           predMap={predMap}
           onSelectDay={scrollToDay}
         />
-      )}
-
-      {/* Floating "predictions left" button */}
-      {auth.user && view === 'matches' && openMatches.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-          <button
-            onClick={jumpToNextPrediction}
-            className="flex items-center gap-2 px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow active:scale-95"
-            style={{ backgroundColor: '#F6F6F6' }}
-          >
-            <span
-              style={{
-                fontFamily: 'Lexend, sans-serif',
-                fontWeight: 400,
-                fontSize: '16px',
-                letterSpacing: '-0.04em',
-                lineHeight: '24px',
-                color: '#0A0A0A',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {openMatches.length} prediction{openMatches.length !== 1 ? 's' : ''} left
-            </span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 3v10M3 8l5 5 5-5" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
       )}
 
       {selected && (
