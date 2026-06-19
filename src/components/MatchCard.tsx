@@ -36,23 +36,35 @@ function abbr(name: string) {
   return name.slice(0, 3).toUpperCase();
 }
 
-function TeamFlag({ name }: { name: string }) {
+function TeamFlag({ name, align = 'left' }: { name: string; align?: 'left' | 'right' }) {
   const url = flagUrl(name);
   return (
-    <div className="flex flex-col items-center gap-2 w-24">
-      {url ? (
-        <img
-          src={url}
-          alt={name}
-          className="w-16 h-10 object-cover rounded-sm shadow-sm"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-      ) : (
-        <div className="w-16 h-10 bg-gray-100 rounded-sm flex items-center justify-center text-xl">
-          🏳️
-        </div>
-      )}
-      <span className="text-xs font-semibold text-gray-800 text-center leading-tight">
+    <div className="flex flex-col" style={{ gap: 6, alignItems: align === 'right' ? 'flex-end' : 'flex-start', flexShrink: 0 }}>
+      <div style={{ width: 80, height: 58, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {url ? (
+          <img
+            src={url}
+            alt={name}
+            style={{ width: 80, height: 58, objectFit: 'cover', borderRadius: 4 }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        ) : (
+          <div style={{ width: 80, height: 58, background: '#F5F5F5', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+            🏳️
+          </div>
+        )}
+      </div>
+      <span style={{
+        fontFamily: 'Manrope, sans-serif',
+        fontWeight: 700,
+        fontSize: 11,
+        color: '#000000',
+        width: 80,
+        lineHeight: '15px',
+        textAlign: align === 'right' ? 'right' : 'left',
+        display: 'block',
+        wordBreak: 'break-word',
+      }}>
         {name}
       </span>
     </div>
@@ -81,34 +93,63 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
         </span>
       </div>
 
-      {/* Teams + scores */}
-      <div className="flex items-center justify-between">
-        <TeamFlag name={match.team1} />
-
-        <div className="flex items-center gap-3 flex-1 justify-center">
-          {state === 'finished' ? (
-            <>
-              <span className="text-5xl font-black text-gray-900 tabular-nums">{match.actualScore1}</span>
-              <span className="text-4xl font-black text-gray-300 mx-1">-</span>
-              <span className="text-5xl font-black text-gray-900 tabular-nums">{match.actualScore2}</span>
-            </>
-          ) : state === 'submitted' ? (
-            <>
-              <span className="text-5xl font-black text-gray-200 tabular-nums">-</span>
-              <span className="text-4xl font-black text-gray-200 mx-1">-</span>
-              <span className="text-5xl font-black text-gray-200 tabular-nums">-</span>
-            </>
-          ) : state === 'open' ? (
-            <span className="text-sm font-bold text-yellow-500 px-3 py-1.5 bg-yellow-50 rounded-lg">
-              Tap to predict
-            </span>
-          ) : (
-            <span className="text-sm font-semibold text-gray-300">vs</span>
-          )}
+      {/* Teams + scores — layout: [flag+name | score] [–] [score | flag+name] */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center', alignSelf: 'stretch' }}>
+        {/* Left group: flag+name column then score */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          <TeamFlag name={match.team1} align="left" />
+          <span style={{
+            fontFamily: 'Lexend, sans-serif',
+            fontWeight: 700,
+            fontSize: 52,
+            lineHeight: '64px',
+            width: 60,
+            textAlign: 'center',
+            color: state === 'finished' ? '#000000' : '#E5E7EB',
+            flexShrink: 0,
+          }}>
+            {state === 'finished' ? match.actualScore1 : '—'}
+          </span>
         </div>
 
-        <TeamFlag name={match.team2} />
+        {/* Hyphen separator */}
+        <span style={{
+          fontFamily: 'Lexend, sans-serif',
+          fontWeight: 700,
+          fontSize: 52,
+          lineHeight: '64px',
+          color: state === 'finished' ? '#000000' : '#E5E7EB',
+          flexShrink: 0,
+        }}>
+          -
+        </span>
+
+        {/* Right group: score then flag+name column */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'flex-end' }}>
+          <span style={{
+            fontFamily: 'Lexend, sans-serif',
+            fontWeight: 700,
+            fontSize: 52,
+            lineHeight: '64px',
+            width: 60,
+            textAlign: 'center',
+            color: state === 'finished' ? '#000000' : '#E5E7EB',
+            flexShrink: 0,
+          }}>
+            {state === 'finished' ? match.actualScore2 : '—'}
+          </span>
+          <TeamFlag name={match.team2} align="right" />
+        </div>
       </div>
+
+      {/* "Tap to predict" prompt for open state */}
+      {state === 'open' && (
+        <div className="mt-1 flex justify-center">
+          <span className="text-sm font-bold text-yellow-500 px-3 py-1 bg-yellow-50 rounded-lg">
+            Tap to predict
+          </span>
+        </div>
+      )}
 
       {/* My prediction (shown below scores for submitted + finished) */}
       {myPrediction && (
