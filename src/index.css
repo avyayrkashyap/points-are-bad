@@ -5,6 +5,17 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+@keyframes dart-fly-in {
+  0%   { transform: translateX(-220vw); }
+  72%  { transform: translateX(7px); }
+  86%  { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+.dart-fly-in {
+  animation: dart-fly-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
 body {
   margin: 0;
   background-color: #ffffff;

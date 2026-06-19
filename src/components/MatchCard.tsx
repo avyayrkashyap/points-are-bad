@@ -186,13 +186,30 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           </div>
           {/* Points badge pill */}
           {pts !== null && (
-            <div
-              className="flex items-center justify-center"
-              style={{ backgroundColor: '#F6F6F6', borderRadius: '999px', padding: '4px 8px' }}
-            >
-              <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#999999' }}>
-                {pts === 0 ? '🎯' : `+${pts}`}
-              </span>
+            <div style={{ position: 'relative' }}>
+              <div
+                className="flex items-center justify-center"
+                style={{ backgroundColor: '#F6F6F6', borderRadius: '999px', padding: '4px 8px' }}
+              >
+                <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#999999' }}>
+                  {pts === 0 ? '🎯' : `+${pts}`}
+                </span>
+              </div>
+              {pts === 0 && (
+                <img
+                  src="/dart.png"
+                  aria-hidden
+                  className="dart-fly-in"
+                  style={{
+                    position: 'absolute',
+                    right: 2,
+                    top: -20,
+                    width: 48,
+                    height: 37,
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
             </div>
           )}
         </div>
