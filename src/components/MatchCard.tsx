@@ -155,14 +155,15 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           position: 'relative',
         }}>
           -
-          {/* Dart tip lands at the hyphen centre; wrapper carries the parabolic
-              animation, inner img is flipped so the dart flies right-to-left. */}
+          {/* Dart tip lands at the hyphen centre. rotate(108deg) on the original
+              image (no flip) puts the tip at the lower-left, matching the
+              ~35° below-horizontal landing angle of the parabolic arc. */}
           {pts === 0 && dartActive && (
             <div
               className="dart-fly-in"
-              style={{ position: 'absolute', left: 4, top: -6, pointerEvents: 'none' }}
+              style={{ position: 'absolute', left: 6, top: -4, pointerEvents: 'none' }}
             >
-              <img src="/dart.png" aria-hidden style={{ transform: 'scaleX(-1)', width: 48, height: 37, display: 'block' }} />
+              <img src="/dart.png" aria-hidden style={{ transform: 'rotate(108deg)', width: 48, height: 37, display: 'block' }} />
             </div>
           )}
         </span>
