@@ -43,7 +43,7 @@ const FLAG_H = 'min(58px, 12.3vw)';
 const SCORE_FONT = 'min(52px, 11.5vw)';
 const SCORE_LINE = 'min(64px, 14.2vw)';
 const SCORE_W = 'min(60px, 13vw)';
-const OUTER_GAP = 'min(16px, 3.5vw)';
+const OUTER_GAP = 'min(8px, 2vw)';
 const INNER_GAP = 'min(8px, 2vw)';
 
 function TeamFlag({ name, align = 'left' }: { name: string; align?: 'left' | 'right' }) {
@@ -103,18 +103,23 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
         </span>
       </div>
 
-      {/* Teams + scores — layout: [flag+name | score] [–] [score | flag+name] */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: OUTER_GAP, justifyContent: 'center', alignSelf: 'stretch' }}>
+      {/* Teams + scores — layout: [flag+name | score] [–] [score | flag+name]
+          alignItems:flex-start + height:FLAG_H on scores/hyphen keeps the
+          number visually centred to the flag image, not dragged down by the
+          team name text that sits below.                                    */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: OUTER_GAP, justifyContent: 'center', alignSelf: 'stretch' }}>
         {/* Left group: flag+name column then score */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: INNER_GAP, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: INNER_GAP, flex: 1 }}>
           <TeamFlag name={match.team1} align="left" />
           <span style={{
             fontFamily: 'Lexend, sans-serif',
-            fontWeight: 700,
+            fontWeight: 900,
             fontSize: SCORE_FONT,
-            lineHeight: SCORE_LINE,
+            height: FLAG_H,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             width: SCORE_W,
-            textAlign: 'center',
             color: state === 'finished' ? '#000000' : '#E5E7EB',
             flexShrink: 0,
           }}>
@@ -122,27 +127,31 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           </span>
         </div>
 
-        {/* Hyphen separator */}
+        {/* Hyphen separator — same height as flag image so it sits centred */}
         <span style={{
           fontFamily: 'Lexend, sans-serif',
-          fontWeight: 700,
+          fontWeight: 900,
           fontSize: SCORE_FONT,
-          lineHeight: SCORE_LINE,
-          color: state === 'finished' ? '#000000' : '#E5E7EB',
+          height: FLAG_H,
+          display: 'flex',
+          alignItems: 'center',
+          color: '#F6F6F6',
           flexShrink: 0,
         }}>
           -
         </span>
 
         {/* Right group: score then flag+name column */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: INNER_GAP, flex: 1, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: INNER_GAP, flex: 1, justifyContent: 'flex-end' }}>
           <span style={{
             fontFamily: 'Lexend, sans-serif',
-            fontWeight: 700,
+            fontWeight: 900,
             fontSize: SCORE_FONT,
-            lineHeight: SCORE_LINE,
+            height: FLAG_H,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             width: SCORE_W,
-            textAlign: 'center',
             color: state === 'finished' ? '#000000' : '#E5E7EB',
             flexShrink: 0,
           }}>
