@@ -105,7 +105,7 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
     <button
       ref={cardRef}
       onClick={clickable ? onClick : undefined}
-      className={`w-full text-left rounded-2xl border-2 bg-white p-4 transition-all
+      className={`w-full text-left rounded-2xl border-2 bg-white p-4 transition-all overflow-hidden
         ${clickable ? 'border-yellow-300 hover:border-yellow-400 cursor-pointer hover:shadow-md' : 'border-gray-100 cursor-default opacity-60'}
       `}
     >
@@ -155,13 +155,15 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           position: 'relative',
         }}>
           -
+          {/* Dart tip lands at the hyphen centre; wrapper carries the parabolic
+              animation, inner img is flipped so the dart flies right-to-left. */}
           {pts === 0 && dartActive && (
-            <img
-              src="/dart.png"
-              aria-hidden
+            <div
               className="dart-fly-in"
-              style={{ position: 'absolute', right: 4, top: -8, width: 48, height: 37, pointerEvents: 'none' }}
-            />
+              style={{ position: 'absolute', left: 4, top: -6, pointerEvents: 'none' }}
+            >
+              <img src="/dart.png" aria-hidden style={{ transform: 'scaleX(-1)', width: 48, height: 37, display: 'block' }} />
+            </div>
           )}
         </span>
 
@@ -211,30 +213,13 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           </div>
           {/* Points badge pill */}
           {pts !== null && (
-            <div style={{ position: 'relative' }}>
-              <div
-                className="flex items-center justify-center"
-                style={{ backgroundColor: '#F6F6F6', borderRadius: '999px', padding: '4px 8px' }}
-              >
-                <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#999999' }}>
-                  {pts === 0 ? '🎯' : `+${pts}`}
-                </span>
-              </div>
-              {pts === 0 && (
-                <img
-                  src="/dart.png"
-                  aria-hidden
-                  className={dartActive ? 'dart-fly-in' : ''}
-                  style={{
-                    position: 'absolute',
-                    right: 2,
-                    top: -20,
-                    width: 48,
-                    height: 37,
-                    pointerEvents: 'none',
-                  }}
-                />
-              )}
+            <div
+              className="flex items-center justify-center"
+              style={{ backgroundColor: '#F6F6F6', borderRadius: '999px', padding: '4px 8px' }}
+            >
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: '12px', color: '#999999' }}>
+                {pts === 0 ? '🎯' : `+${pts}`}
+              </span>
             </div>
           )}
         </div>
