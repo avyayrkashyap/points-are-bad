@@ -78,13 +78,14 @@ function App() {
   // Scroll to today whenever the matches tab becomes active
   useEffect(() => {
     if (view !== 'matches') return;
+    if (auth.loading || !auth.user) return;
     if (dayGroups.length === 0) return;
     const now = new Date();
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const target = dayGroups.find((g) => g.dateKey >= todayKey);
     if (!target) return;
     requestAnimationFrame(() => scrollToDay(target.dateKey, 'auto'));
-  }, [view, dayGroups.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [view, auth.loading, auth.user?.uid, dayGroups.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
 if (auth.loading) {
     return (
