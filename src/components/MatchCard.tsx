@@ -37,10 +37,9 @@ function abbr(name: string) {
   return name.slice(0, 3).toUpperCase();
 }
 
-// Flag width and score size scale with viewport so the card fits at 340 px.
-// At ≥470 px they hit their maxima (80 px / 52 px) and stop growing.
+// Flag width scales with viewport; height is auto so each flag's natural
+// aspect ratio is preserved. At ≥470 px the width caps at 80 px.
 const FLAG_W = 'min(80px, 17vw)';
-const FLAG_H = 'min(58px, 12.3vw)';
 const SCORE_FONT = 'min(52px, 11.5vw)';
 const SCORE_W = 'min(60px, 13vw)';
 const OUTER_GAP = 'min(8px, 2vw)';
@@ -49,27 +48,24 @@ const INNER_GAP = 'min(8px, 2vw)';
 function TeamFlag({ name, align = 'left' }: { name: string; align?: 'left' | 'right' }) {
   const url = flagUrl(name);
   return (
-    <div className="flex flex-col" style={{ gap: 6, alignItems: align === 'right' ? 'flex-end' : 'flex-start', flexShrink: 0 }}>
-      <div style={{ width: FLAG_W, height: FLAG_H, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {url ? (
-          <img
-            src={url}
-            alt={name}
-            style={{ width: FLAG_W, height: FLAG_H, objectFit: 'cover', borderRadius: 4 }}
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
-        ) : (
-          <div style={{ width: FLAG_W, height: FLAG_H, background: '#F5F5F5', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
-            🏳️
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col" style={{ gap: 6, alignItems: align === 'right' ? 'flex-end' : 'flex-start', flexShrink: 0, width: FLAG_W }}>
+      {url ? (
+        <img
+          src={url}
+          alt={name}
+          style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: 4, display: 'block' }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
+      ) : (
+        <div style={{ width: '100%', aspectRatio: '3/2', background: '#F5F5F5', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+          🏳️
+        </div>
+      )}
       <span style={{
         fontFamily: 'Manrope, sans-serif',
         fontWeight: 700,
         fontSize: 11,
         color: '#000000',
-        width: FLAG_W,
         lineHeight: '15px',
         textAlign: align === 'right' ? 'right' : 'left',
         display: 'block',
@@ -118,19 +114,15 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
         </span>
       </div>
 
-      {/* Teams + scores — layout: [flag+name | score] [–] [score | flag+name]
-          alignItems:flex-start + height:FLAG_H on scores/hyphen keeps the
-          number visually centred to the flag image, not dragged down by the
-          team name text that sits below.                                    */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: OUTER_GAP, justifyContent: 'center', alignSelf: 'stretch' }}>
+      {/* Teams + scores — layout: [flag+name | score] [–] [score | flag+name] */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: OUTER_GAP, justifyContent: 'center', alignSelf: 'stretch' }}>
         {/* Left group: flag+name column then score */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: INNER_GAP, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: INNER_GAP, flex: 1 }}>
           <TeamFlag name={match.team1} align="left" />
           <span style={{
             fontFamily: 'Lexend, sans-serif',
             fontWeight: 900,
             fontSize: SCORE_FONT,
-            height: FLAG_H,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -142,14 +134,11 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
           </span>
         </div>
 
-        {/* Hyphen separator — same height as flag image so it sits centred */}
+        {/* Hyphen separator */}
         <span style={{
           fontFamily: 'Lexend, sans-serif',
           fontWeight: 900,
           fontSize: SCORE_FONT,
-          height: FLAG_H,
-          display: 'flex',
-          alignItems: 'center',
           color: '#F6F6F6',
           flexShrink: 0,
           position: 'relative',
@@ -169,12 +158,11 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
         </span>
 
         {/* Right group: score then flag+name column */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: INNER_GAP, flex: 1, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: INNER_GAP, flex: 1, justifyContent: 'flex-end' }}>
           <span style={{
             fontFamily: 'Lexend, sans-serif',
             fontWeight: 900,
             fontSize: SCORE_FONT,
-            height: FLAG_H,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
