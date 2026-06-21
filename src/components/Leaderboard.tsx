@@ -12,6 +12,7 @@ import {
   toggleExcludedUser,
   writeExcludedUserIds,
 } from '../lib/leaderboard-filter';
+import { subscribeLeaderboardFilter, writeLeaderboardFilter } from '../lib/leaderboard-filter-sync';
 
 export function Leaderboard() {
   const { user } = useAuth();
@@ -32,12 +33,23 @@ export function Leaderboard() {
     });
   }, []);
 
+  // Sync filter from Firestore; localStorage seeds the initial render to avoid flicker
+  useEffect(() => {
+    if (!viewerId) return;
+    return subscribeLeaderboardFilter(viewerId, (ids) => {
+      setExcludedUserIds(ids);
+    });
+  }, [viewerId]);
+
   const visibleRows = filterLeaderboardEntries(rows, excludedUserIds);
   const closeFilter = useCallback(() => setFilterOpen(false), []);
 
   function updateExcludedUserIds(next: Set<string>) {
     setExcludedUserIds(next);
-    if (viewerId) writeExcludedUserIds(window.localStorage, viewerId, next);
+    if (viewerId) {
+      writeExcludedUserIds(window.localStorage, viewerId, next);
+      writeLeaderboardFilter(viewerId, next);
+    }
   }
 
   function selectAll() {
