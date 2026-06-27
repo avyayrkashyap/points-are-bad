@@ -93,7 +93,9 @@ export function MatchCard({ match, myPrediction, onClick }: Props) {
     >
       {/* Status row */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-gray-400 font-medium">Group {match.group}</span>
+        <span className="text-xs text-gray-400 font-medium">
+          {match.group.length === 1 ? `Group ${match.group}` : match.group}
+        </span>
         <span className={`flex items-center gap-1.5 text-xs font-semibold ${textColor}`}>
           <span className={`w-2 h-2 rounded-full ${dot}`} />
           {label}

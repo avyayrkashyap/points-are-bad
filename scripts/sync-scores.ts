@@ -1,6 +1,7 @@
 /**
- * Syncs actual scores for finished WC 2026 group-stage matches into Firestore,
- * then recomputes the leaderboard aggregates (totalPoints, matchesScored per user).
+ * Syncs actual scores for all finished WC 2026 matches (group stage + knockout)
+ * into Firestore, and updates team names for knockout matches as the bracket
+ * fills in. Then recomputes leaderboard aggregates.
  *
  * Run manually:  npx tsx --env-file=.env scripts/sync-scores.ts
  * In CI:         uses FIREBASE_SERVICE_ACCOUNT secret (base64-encoded JSON)
@@ -38,20 +39,37 @@ const db = getFirestore();
 
 interface ApiMatch {
   id: number;
+  stage: string;
   status: string;
+  homeTeam: { name: string };
+  awayTeam: { name: string };
   score: {
     fullTime: { home: number | null; away: number | null };
   };
 }
 
+const GROUP_STAGE = 'GROUP_STAGE';
+
 async function fetchFinishedMatches(): Promise<ApiMatch[]> {
   const res = await fetch(
-    'https://api.football-data.org/v4/competitions/WC/matches?stage=GROUP_STAGE&status=FINISHED',
+    'https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',
     { headers: { 'X-Auth-Token': apiKey! } }
   );
   if (!res.ok) throw new Error(`API error: ${res.status} ${await res.text()}`);
   const data = await res.json() as { matches: ApiMatch[] };
   return data.matches;
+}
+
+// Fetches all knockout matches so we can keep team names up to date as the
+// bracket fills in (team names go from TBD to real names after group stage).
+async function fetchKnockoutMatches(): Promise<ApiMatch[]> {
+  const res = await fetch(
+    'https://api.football-data.org/v4/competitions/WC/matches',
+    { headers: { 'X-Auth-Token': apiKey! } }
+  );
+  if (!res.ok) throw new Error(`API error: ${res.status} ${await res.text()}`);
+  const data = await res.json() as { matches: ApiMatch[] };
+  return data.matches.filter((m) => m.stage !== GROUP_STAGE);
 }
 
 async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map<string, { home: number; away: number }>) {
@@ -183,20 +201,16 @@ async function recomputeLeaderboard(finishedMatchIds: Set<string>, scoreMap: Map
 }
 
 async function syncScores() {
-  console.log('Fetching finished group-stage matches...');
-  const finished = await fetchFinishedMatches();
+  console.log('Fetching all finished matches...');
+  const [finished, knockout] = await Promise.all([fetchFinishedMatches(), fetchKnockoutMatches()]);
   console.log(`Found ${finished.length} finished matches.`);
 
-  if (finished.length === 0) {
-    console.log('Nothing to update.');
-    process.exit(0);
-  }
-
-  // Build score map keyed by Firestore match ID (string)
   const scoreMap = new Map<string, { home: number; away: number }>();
   const batch = db.batch();
-  let updated = 0;
+  let scoresUpdated = 0;
+  let teamsUpdated = 0;
 
+  // Update scores for all finished matches
   for (const m of finished) {
     const { home, away } = m.score.fullTime;
     if (home === null || away === null) continue;
@@ -206,17 +220,32 @@ async function syncScores() {
 
     const ref = db.collection('matches').doc(matchId);
     batch.update(ref, { actualScore1: home, actualScore2: away });
-    updated++;
+    scoresUpdated++;
   }
 
-  if (updated > 0) {
+  // Update team names for knockout matches as the bracket fills in
+  for (const m of knockout) {
+    const team1 = m.homeTeam.name;
+    const team2 = m.awayTeam.name;
+    if (!team1 || !team2) continue;
+    const ref = db.collection('matches').doc(String(m.id));
+    batch.update(ref, { team1, team2 });
+    teamsUpdated++;
+  }
+
+  if (scoresUpdated > 0 || teamsUpdated > 0) {
     await batch.commit();
-    console.log(`Updated scores for ${updated} matches.`);
+    if (scoresUpdated > 0) console.log(`Updated scores for ${scoresUpdated} matches.`);
+    if (teamsUpdated > 0) console.log(`Updated team names for ${teamsUpdated} knockout matches.`);
   } else {
-    console.log('No score changes to write.');
+    console.log('No changes to write.');
   }
 
-  // Recompute leaderboard using the finished match IDs + scores
+  if (scoreMap.size === 0) {
+    console.log('No finished matches — skipping leaderboard recompute.');
+    process.exit(0);
+  }
+
   await recomputeLeaderboard(new Set(scoreMap.keys()), scoreMap);
 
   process.exit(0);

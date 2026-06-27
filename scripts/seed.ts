@@ -1,6 +1,7 @@
 /**
- * Fetches WC 2026 group-stage fixtures from football-data.org and seeds Firestore.
- * Safe to re-run — uses the API match ID as the document ID so it's idempotent.
+ * Fetches all WC 2026 fixtures (group stage + knockout) from football-data.org
+ * and seeds Firestore. Safe to re-run — uses the API match ID as the document
+ * ID so it's idempotent.
  *
  * Setup:
  *   1. service-account.json in project root (Firebase Admin key)
@@ -37,9 +38,23 @@ interface ApiMatch {
   venue: string | null;
 }
 
-async function fetchGroupStageMatches(): Promise<ApiMatch[]> {
+const STAGE_LABELS: Record<string, string> = {
+  LAST_32: 'Round of 32',
+  LAST_16: 'Round of 16',
+  QUARTER_FINALS: 'Quarter-final',
+  SEMI_FINALS: 'Semi-final',
+  THIRD_PLACE: '3rd Place',
+  FINAL: 'Final',
+};
+
+function stageToGroup(stage: string, group: string | null): string {
+  if (stage === 'GROUP_STAGE' && group) return group.replace('GROUP_', '');
+  return STAGE_LABELS[stage] ?? stage;
+}
+
+async function fetchAllMatches(): Promise<ApiMatch[]> {
   const res = await fetch(
-    'https://api.football-data.org/v4/competitions/WC/matches?stage=GROUP_STAGE',
+    'https://api.football-data.org/v4/competitions/WC/matches',
     { headers: { 'X-Auth-Token': apiKey! } }
   );
   if (!res.ok) throw new Error(`API error: ${res.status} ${await res.text()}`);
@@ -47,14 +62,9 @@ async function fetchGroupStageMatches(): Promise<ApiMatch[]> {
   return data.matches;
 }
 
-function groupLetter(raw: string | null): string {
-  // "GROUP_A" → "A"
-  return raw ? raw.replace('GROUP_', '') : '?';
-}
-
 async function seed() {
-  console.log('Fetching WC 2026 group-stage fixtures from football-data.org...');
-  const matches = await fetchGroupStageMatches();
+  console.log('Fetching all WC 2026 fixtures from football-data.org...');
+  const matches = await fetchAllMatches();
   console.log(`Got ${matches.length} matches — writing to Firestore...`);
 
   const batch = db.batch();
@@ -63,7 +73,7 @@ async function seed() {
     batch.set(ref, {
       team1: m.homeTeam.name,
       team2: m.awayTeam.name,
-      group: groupLetter(m.group),
+      group: stageToGroup(m.stage, m.group),
       date: Timestamp.fromDate(new Date(m.utcDate)),
       venue: m.venue ?? '',
     });
