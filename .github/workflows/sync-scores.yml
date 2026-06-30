@@ -2,8 +2,7 @@ name: Sync Match Scores
 
 on:
   schedule:
-    # Every 3 hours during the WC 2026 group stage (June 12 – July 3)
-    - cron: '0 */3 * * *'
+    - cron: '0 * * * *'
   workflow_dispatch: # allow manual trigger from GitHub Actions tab
 
 jobs:
