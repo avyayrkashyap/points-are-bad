@@ -183,7 +183,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                       }`}
                     >
                       <Avatar photo={p.userPhoto} name={p.userName} />
-                      <span className="text-sm text-gray-800 dark:text-gray-200 flex-1 truncate font-medium">
+                      <span className={`text-sm flex-1 truncate font-medium ${p.userId === user?.uid ? 'text-gray-900' : 'text-gray-800 dark:text-gray-200'}`}>
                         {p.userName}
                         {p.userId === user?.uid && (
                           <span className="ml-2 text-xs text-yellow-600 font-bold">(you)</span>

@@ -162,8 +162,8 @@ export function Leaderboard() {
             {/* Total pts */}
             <div className="w-[60px] flex-shrink-0 flex items-center justify-end gap-1 pl-2">
               <span
-                className="font-['Lexend'] font-normal text-base tracking-tight leading-8"
-                style={{ color: '#0A0A0A' }}
+                className={`font-['Lexend'] font-normal text-base tracking-tight leading-8 ${isMe ? '' : 'dark:text-gray-100'}`}
+                style={{ color: isMe ? '#0A0A0A' : undefined }}
               >
                 {row.totalPoints}
               </span>
