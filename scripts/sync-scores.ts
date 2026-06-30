@@ -37,6 +37,8 @@ if (!apiKey) {
 initializeApp({ credential: cert(serviceAccount as Parameters<typeof cert>[0]) });
 const db = getFirestore();
 
+interface ScoreEntry { home: number | null; away: number | null; }
+
 interface ApiMatch {
   id: number;
   stage: string;
@@ -44,8 +46,20 @@ interface ApiMatch {
   homeTeam: { name: string };
   awayTeam: { name: string };
   score: {
-    fullTime: { home: number | null; away: number | null };
+    duration: 'REGULAR' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT';
+    fullTime: ScoreEntry;
+    regularTime?: ScoreEntry;  // present when duration is EXTRA_TIME or PENALTY_SHOOTOUT
   };
+}
+
+// Returns the 90-minute score, ignoring extra time goals and penalty shootouts.
+// API sets fullTime = PSO score for PENALTY_SHOOTOUT and ET score for EXTRA_TIME;
+// regularTime holds the true 90-min result in both those cases.
+function regularTimeScore(m: ApiMatch): { home: number; away: number } | null {
+  const { regularTime, fullTime } = m.score;
+  const s = (regularTime?.home != null && regularTime?.away != null) ? regularTime : fullTime;
+  if (s.home === null || s.away === null) return null;
+  return { home: s.home, away: s.away };
 }
 
 const GROUP_STAGE = 'GROUP_STAGE';
@@ -210,16 +224,16 @@ async function syncScores() {
   let scoresUpdated = 0;
   let teamsUpdated = 0;
 
-  // Update scores for all finished matches
+  // Update scores for all finished matches — use 90-min score only
   for (const m of finished) {
-    const { home, away } = m.score.fullTime;
-    if (home === null || away === null) continue;
+    const score = regularTimeScore(m);
+    if (!score) continue;
 
     const matchId = String(m.id);
-    scoreMap.set(matchId, { home, away });
+    scoreMap.set(matchId, score);
 
     const ref = db.collection('matches').doc(matchId);
-    batch.update(ref, { actualScore1: home, actualScore2: away });
+    batch.update(ref, { actualScore1: score.home, actualScore2: score.away });
     scoresUpdated++;
   }
 
