@@ -53,22 +53,14 @@ interface ApiMatch {
   };
 }
 
-// Returns the final score excluding penalty shootout goals.
-// - REGULAR:            fullTime (90-min score)
-// - EXTRA_TIME:         fullTime (= regularTime + extraTime, already correct)
-// - PENALTY_SHOOTOUT:   regularTime + extraTime (fullTime includes PSO goals, so we sum manually)
+// regularTime is absent for REGULAR games, so fall back to fullTime (same value).
+// extraTime is null for non-ET games, so the ?? 0 adds nothing.
+// This naturally excludes PSO goals in all cases.
 function finalScoreNoPSO(m: ApiMatch): { home: number; away: number } | null {
-  if (m.score.duration === 'PENALTY_SHOOTOUT') {
-    const rt = m.score.regularTime;
-    const et = m.score.extraTime;
-    if (rt?.home == null || rt?.away == null) return null;
-    const etHome = et?.home ?? 0;
-    const etAway = et?.away ?? 0;
-    return { home: rt.home + etHome, away: rt.away + etAway };
-  }
-  const { home, away } = m.score.fullTime;
-  if (home === null || away === null) return null;
-  return { home, away };
+  const base = m.score.regularTime ?? m.score.fullTime;
+  const et = m.score.extraTime;
+  if (base.home === null || base.away === null) return null;
+  return { home: base.home + (et?.home ?? 0), away: base.away + (et?.away ?? 0) };
 }
 
 const GROUP_STAGE = 'GROUP_STAGE';
