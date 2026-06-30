@@ -17,7 +17,7 @@ export function CalendarBar({ groups, predMap, onSelectDay }: Props) {
   }, [groups.length]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
       <div className="max-w-lg mx-auto overflow-x-auto scrollbar-hide">
         <div className="flex gap-1 px-3 py-3" style={{ width: 'max-content' }}>
           {groups.map((g) => {
@@ -33,7 +33,7 @@ export function CalendarBar({ groups, predMap, onSelectDay }: Props) {
                 ref={g.isToday ? todayRef : undefined}
                 onClick={() => onSelectDay(g.dateKey)}
                 className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors flex-shrink-0 ${
-                  g.isToday ? 'bg-yellow-300' : 'hover:bg-gray-50'
+                  g.isToday ? 'bg-yellow-300' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
                 <span
@@ -43,8 +43,8 @@ export function CalendarBar({ groups, predMap, onSelectDay }: Props) {
                   {g.dayLetter}
                 </span>
                 <span
-                  className="text-sm font-black leading-tight"
-                  style={{ color: g.isToday ? '#0A0A0A' : '#333333' }}
+                  className="text-sm font-black leading-tight dark:text-gray-100"
+                  style={{ color: g.isToday ? '#0A0A0A' : undefined }}
                 >
                   {g.dayNum}
                 </span>

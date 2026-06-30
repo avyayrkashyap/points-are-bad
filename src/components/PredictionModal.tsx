@@ -86,7 +86,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div ref={sheetRef} className="bottom-sheet-enter w-full max-w-lg bg-white rounded-t-3xl px-6 pt-5 pb-10 shadow-2xl">
+      <div ref={sheetRef} className="bottom-sheet-enter w-full max-w-lg bg-white dark:bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 shadow-2xl">
         <BottomSheetHandle {...swipeHandlers} />
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
@@ -102,11 +102,11 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <FlagImg name={match.team1} />
-            <span className="text-base font-bold text-gray-900">{match.team1}</span>
+            <span className="text-base font-bold text-gray-900 dark:text-gray-100">{match.team1}</span>
           </div>
-          <span className="text-sm font-semibold text-gray-300">vs</span>
+          <span className="text-sm font-semibold text-gray-300 dark:text-gray-600">vs</span>
           <div className="flex items-center gap-2">
-            <span className="text-base font-bold text-gray-900">{match.team2}</span>
+            <span className="text-base font-bold text-gray-900 dark:text-gray-100">{match.team2}</span>
             <FlagImg name={match.team2} />
           </div>
         </div>
@@ -131,21 +131,21 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                   max={20}
                   value={score1}
                   onChange={(e) => setScore1(e.target.value)}
-                  className="w-20 h-16 text-3xl font-black text-center text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-yellow-400 focus:outline-none"
+                  className="w-20 h-16 text-3xl font-black text-center text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-yellow-400 focus:outline-none"
                   placeholder="0"
                   required
                 />
               </div>
-              <span className="text-2xl font-black text-gray-300 mt-5">–</span>
+              <span className="text-2xl font-black text-gray-300 dark:text-gray-600 mt-5">–</span>
               <div className="flex flex-col items-center gap-1">
-                <span className="text-xs font-semibold text-gray-500">{match.team2}</span>
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{match.team2}</span>
                 <input
                   type="number"
                   min={0}
                   max={20}
                   value={score2}
                   onChange={(e) => setScore2(e.target.value)}
-                  className="w-20 h-16 text-3xl font-black text-center text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-yellow-400 focus:outline-none"
+                  className="w-20 h-16 text-3xl font-black text-center text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-yellow-400 focus:outline-none"
                   placeholder="0"
                   required
                 />
@@ -179,7 +179,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                       className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
                         p.userId === user?.uid
                           ? 'bg-yellow-50 border-2 border-yellow-300'
-                          : 'bg-gray-50 border border-gray-100'
+                          : 'bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
                       }`}
                     >
                       <Avatar photo={p.userPhoto} name={p.userName} />
@@ -190,7 +190,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                         )}
                       </span>
                       <div className="flex flex-col items-end gap-0.5">
-                        <span className="text-lg font-black text-gray-900 tabular-nums">
+                        <span className="text-lg font-black text-gray-900 dark:text-gray-100 tabular-nums">
                           {p.score1} – {p.score2}
                         </span>
                         {(() => {

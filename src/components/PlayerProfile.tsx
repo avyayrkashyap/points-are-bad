@@ -43,7 +43,7 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div ref={sheetRef} className="bottom-sheet-enter w-full max-w-lg bg-white rounded-t-3xl px-6 pt-5 pb-10 shadow-2xl">
+      <div ref={sheetRef} className="bottom-sheet-enter w-full max-w-lg bg-white dark:bg-gray-900 rounded-t-3xl px-6 pt-5 pb-10 shadow-2xl">
         <BottomSheetHandle {...swipeHandlers} />
 
         {/* Header */}
@@ -60,7 +60,7 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-black text-lg text-gray-900 leading-tight">{player.displayName}</span>
+                <span className="font-black text-lg text-gray-900 dark:text-gray-100 leading-tight">{player.displayName}</span>
                 {rank <= 3 && <span className="text-lg">{MEDALS[rank - 1]}</span>}
               </div>
               <span className="text-xs text-gray-400 font-medium">Rank #{rank}</span>
@@ -228,7 +228,7 @@ function StatBox({ label, value, highlight, dim }: {
 }) {
   return (
     <div
-      className={`rounded-2xl px-3 py-3 flex flex-col items-center gap-0.5 ${highlight ? 'bg-yellow-300' : 'bg-gray-50'}`}
+      className={`rounded-2xl px-3 py-3 flex flex-col items-center gap-0.5 ${highlight ? 'bg-yellow-300' : 'bg-gray-50 dark:bg-gray-800'}`}
     >
       <span
         className="font-black text-2xl leading-tight tracking-tight"

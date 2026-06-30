@@ -48,3 +48,7 @@ body {
   font-family: 'Lexend', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+html.dark body {
+  background-color: #111827;
+}

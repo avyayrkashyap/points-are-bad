@@ -11,7 +11,7 @@ export function BottomSheetHandle({ className = '', ...dragHandlers }: Props) {
       className={`flex justify-center -mt-2 pt-2 pb-4 touch-none cursor-grab active:cursor-grabbing ${className}`}
       {...dragHandlers}
     >
-      <div className="w-10 h-1 bg-gray-200 rounded-full" />
+      <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
     </div>
   );
 }

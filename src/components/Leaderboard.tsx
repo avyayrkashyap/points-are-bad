@@ -83,14 +83,14 @@ export function Leaderboard() {
   return (
     <>
     <div className="px-1 pt-4 flex items-center justify-between gap-4">
-      <h2 className="font-['Lexend'] text-xl font-black text-gray-900">
+      <h2 className="font-['Lexend'] text-xl font-black text-gray-900 dark:text-gray-100">
         Leaderboard
       </h2>
       <button
         ref={filterButtonRef}
         onClick={() => setFilterOpen(true)}
         aria-label={`Filter leaderboard, ${visibleRows.length} of ${rows.length} players selected`}
-        className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-bold text-gray-700"
+        className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-bold text-gray-700 dark:text-gray-200"
       >
         <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
@@ -124,7 +124,7 @@ export function Leaderboard() {
         return (
           <div
             key={row.userId}
-            className={`flex items-center rounded-full px-3 cursor-pointer active:opacity-70 transition-opacity ${isMe ? 'bg-yellow-300' : 'hover:bg-gray-50'}`}
+            className={`flex items-center rounded-full px-3 cursor-pointer active:opacity-70 transition-opacity ${isMe ? 'bg-yellow-300' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             style={{ minHeight: '44px' }}
             onClick={() => setSelected({ entry: row, rank: i + 1 })}
           >
@@ -140,16 +140,16 @@ export function Leaderboard() {
 
             {/* Name */}
             <span
-              className="flex-1 font-['Lexend'] font-bold text-[15px] leading-5 truncate"
-              style={{ color: '#0A0A0A' }}
+              className="flex-1 font-['Lexend'] font-bold text-[15px] leading-5 truncate dark:text-gray-100"
+              style={{ color: isMe ? '#0A0A0A' : undefined }}
             >
               {row.displayName}
             </span>
 
             {/* Pts/game badge */}
             <div
-              className="w-[72px] flex-shrink-0 flex items-center justify-center rounded px-1 py-0.5"
-              style={{ backgroundColor: isMe ? '#D7AF3A' : '#F6F6F6' }}
+              className={`w-[72px] flex-shrink-0 flex items-center justify-center rounded px-1 py-0.5 ${isMe ? '' : 'bg-gray-100 dark:bg-gray-700'}`}
+              style={isMe ? { backgroundColor: '#D7AF3A' } : undefined}
             >
               <span
                 className="font-['Lexend'] font-medium text-xs tracking-tight"

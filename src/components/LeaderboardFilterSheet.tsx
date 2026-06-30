@@ -80,16 +80,16 @@ export function LeaderboardFilterSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby="leaderboard-filter-title"
-        className="bottom-sheet-enter w-full max-w-lg bg-white rounded-t-3xl px-5 pt-5 pb-8 shadow-2xl"
+        className="bottom-sheet-enter w-full max-w-lg bg-white dark:bg-gray-900 rounded-t-3xl px-5 pt-5 pb-8 shadow-2xl"
       >
         <BottomSheetHandle {...swipeHandlers} />
 
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <h2 id="leaderboard-filter-title" className="font-black text-xl text-gray-900">
+            <h2 id="leaderboard-filter-title" className="font-black text-xl text-gray-900 dark:text-gray-100">
               Filter leaderboard
             </h2>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
               {selectedCount} of {entries.length} players selected
             </p>
           </div>
@@ -118,13 +118,13 @@ export function LeaderboardFilterSheet({
           </button>
         </div>
 
-        <div className="max-h-[55vh] overflow-y-auto rounded-2xl border border-gray-100 divide-y divide-gray-100">
+        <div className="max-h-[55vh] overflow-y-auto rounded-2xl border border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
           {entries.map((entry) => {
             const checked = !excludedUserIds.has(entry.userId);
             return (
               <label
                 key={entry.userId}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <input
                   type="checkbox"
@@ -145,7 +145,7 @@ export function LeaderboardFilterSheet({
                     </span>
                   )}
                 </div>
-                <span className="font-bold text-sm text-gray-900 truncate">
+                <span className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">
                   {entry.displayName}
                 </span>
               </label>
