@@ -121,10 +121,10 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
         {!myPrediction ? (
           /* Prediction form */
           <form onSubmit={handleSubmit}>
-            <p className="text-sm text-gray-500 mb-4 text-center font-medium">What's your prediction?</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 text-center font-medium">What's your prediction?</p>
             <div className="flex items-center justify-center gap-4 mb-6">
               <div className="flex flex-col items-center gap-1">
-                <span className="text-xs font-semibold text-gray-500">{match.team1}</span>
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{match.team1}</span>
                 <input
                   type="number"
                   min={0}
@@ -166,7 +166,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
         ) : (
           /* Reveal */
           <div>
-            <p className="text-sm text-gray-500 mb-3 text-center font-medium">Everyone's predictions</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 text-center font-medium">Everyone's predictions</p>
             {allPredictions.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-4">Loading…</p>
             ) : (
@@ -183,7 +183,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                       }`}
                     >
                       <Avatar photo={p.userPhoto} name={p.userName} />
-                      <span className="text-sm text-gray-800 flex-1 truncate font-medium">
+                      <span className="text-sm text-gray-800 dark:text-gray-200 flex-1 truncate font-medium">
                         {p.userName}
                         {p.userId === user?.uid && (
                           <span className="ml-2 text-xs text-yellow-600 font-bold">(you)</span>

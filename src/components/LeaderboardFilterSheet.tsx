@@ -112,7 +112,7 @@ export function LeaderboardFilterSheet({
           </button>
           <button
             onClick={onClearAll}
-            className="flex-1 py-2 rounded-xl bg-gray-100 text-sm font-bold text-gray-600 hover:bg-gray-200"
+            className="flex-1 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             Clear all
           </button>

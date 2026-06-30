@@ -6,6 +6,7 @@ import {
 import type { LeaderboardEntry } from '../lib/leaderboard';
 import { useSwipeToDismiss } from '../lib/useSwipeToDismiss';
 import { BottomSheetHandle } from './BottomSheetHandle';
+import { useIsDark } from '../lib/theme';
 
 interface Props {
   player: LeaderboardEntry;
@@ -16,6 +17,7 @@ interface Props {
 const MEDALS = ['🥇', '🥈', '🥉'];
 
 export function PlayerProfile({ player, rank, onClose }: Props) {
+  const isDark = useIsDark();
   const overlayRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const swipeHandlers = useSwipeToDismiss(sheetRef, onClose);
@@ -82,7 +84,7 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
           <div className="flex items-center justify-center gap-3 mb-2">
             <button
               onClick={() => setChartIndex(0)}
-              className={`text-[11px] font-semibold tracking-widest uppercase transition-colors ${chartIndex === 0 ? 'text-gray-700' : 'text-gray-300'}`}
+              className={`text-[11px] font-semibold tracking-widest uppercase transition-colors ${chartIndex === 0 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600'}`}
             >
               Distribution
             </button>
@@ -91,13 +93,13 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
                 <div
                   key={i}
                   onClick={() => setChartIndex(i)}
-                  className={`w-1.5 h-1.5 rounded-full cursor-pointer transition-colors ${chartIndex === i ? 'bg-yellow-400' : 'bg-gray-200'}`}
+                  className={`w-1.5 h-1.5 rounded-full cursor-pointer transition-colors ${chartIndex === i ? 'bg-yellow-400' : 'bg-gray-200 dark:bg-gray-700'}`}
                 />
               ))}
             </div>
             <button
               onClick={() => setChartIndex(1)}
-              className={`text-[11px] font-semibold tracking-widest uppercase transition-colors ${chartIndex === 1 ? 'text-gray-700' : 'text-gray-300'}`}
+              className={`text-[11px] font-semibold tracking-widest uppercase transition-colors ${chartIndex === 1 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600'}`}
             >
               Game by game
             </button>
@@ -113,10 +115,10 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
               <div className="w-full flex-shrink-0">
                 <ResponsiveContainer width="100%" height={220}>
                   <RadarChart data={radarData} margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
-                    <PolarGrid stroke="#EEEEEE" />
+                    <PolarGrid stroke={isDark ? '#374151' : '#EEEEEE'} />
                     <PolarAngleAxis
                       dataKey="label"
-                      tick={{ fontFamily: 'Lexend, sans-serif', fontSize: 12, fontWeight: 600, fill: '#555' }}
+                      tick={{ fontFamily: 'Lexend, sans-serif', fontSize: 12, fontWeight: 600, fill: isDark ? '#9CA3AF' : '#555' }}
                     />
                     <Radar
                       dataKey="value"
@@ -152,22 +154,22 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
                           <stop offset="95%" stopColor="#F5C842" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0F0'} vertical={false} />
                       <XAxis
                         dataKey="game"
-                        tick={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, fill: '#AAAAAA' }}
+                        tick={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, fill: isDark ? '#6B7280' : '#AAAAAA' }}
                         axisLine={false}
                         tickLine={false}
-                        label={{ value: 'Game', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#CCCCCC', fontFamily: 'Lexend, sans-serif' }}
+                        label={{ value: 'Game', position: 'insideBottom', offset: -2, fontSize: 10, fill: isDark ? '#4B5563' : '#CCCCCC', fontFamily: 'Lexend, sans-serif' }}
                       />
                       <YAxis
-                        tick={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, fill: '#AAAAAA' }}
+                        tick={{ fontFamily: 'Lexend, sans-serif', fontSize: 11, fill: isDark ? '#6B7280' : '#AAAAAA' }}
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
                       />
                       <Tooltip
-                        contentStyle={{ fontFamily: 'Lexend, sans-serif', fontSize: 12, borderRadius: 8, border: '1px solid #EEE' }}
+                        contentStyle={{ fontFamily: 'Lexend, sans-serif', fontSize: 12, borderRadius: 8, border: `1px solid ${isDark ? '#374151' : '#EEE'}`, backgroundColor: isDark ? '#1F2937' : '#fff', color: isDark ? '#F9FAFB' : '#111' }}
                         formatter={(val, name, entry) => {
                           if (name === 'avg') return [`${val} avg`, 'Rolling avg'];
                           return [(entry.payload as { miss: boolean }).miss ? `${val} pts (missed)` : `${val} pts`, 'This game'];
@@ -198,7 +200,7 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
                       <Area
                         type="monotone"
                         dataKey="avg"
-                        stroke="#0A0A0A"
+                        stroke={isDark ? '#9CA3AF' : '#0A0A0A'}
                         strokeWidth={1.5}
                         strokeDasharray="4 3"
                         fill="none"
@@ -226,13 +228,15 @@ export function PlayerProfile({ player, rank, onClose }: Props) {
 function StatBox({ label, value, highlight, dim }: {
   label: string; value: string; highlight?: boolean; dim?: boolean;
 }) {
+  const isDark = useIsDark();
+  const valueColor = dim ? '#AAAAAA' : (isDark && !highlight ? '#F9FAFB' : '#0A0A0A');
   return (
     <div
       className={`rounded-2xl px-3 py-3 flex flex-col items-center gap-0.5 ${highlight ? 'bg-yellow-300' : 'bg-gray-50 dark:bg-gray-800'}`}
     >
       <span
         className="font-black text-2xl leading-tight tracking-tight"
-        style={{ color: dim ? '#AAAAAA' : '#0A0A0A' }}
+        style={{ color: valueColor }}
       >
         {value}
       </span>
