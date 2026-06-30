@@ -178,7 +178,7 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                       key={p.id}
                       className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
                         p.userId === user?.uid
-                          ? 'bg-yellow-50 border-2 border-yellow-300'
+                          ? 'bg-yellow-300'
                           : 'bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
                       }`}
                     >
@@ -186,17 +186,22 @@ export function PredictionModal({ match, myPrediction, onClose }: Props) {
                       <span className={`text-sm flex-1 truncate font-medium ${p.userId === user?.uid ? 'text-gray-900' : 'text-gray-800 dark:text-gray-200'}`}>
                         {p.userName}
                         {p.userId === user?.uid && (
-                          <span className="ml-2 text-xs text-yellow-600 font-bold">(you)</span>
+                          <span className="ml-2 text-xs text-gray-700 font-bold">(you)</span>
                         )}
                       </span>
                       <div className="flex flex-col items-end gap-0.5">
-                        <span className="text-lg font-black text-gray-900 dark:text-gray-100 tabular-nums">
+                        <span className={`text-lg font-black tabular-nums ${p.userId === user?.uid ? 'text-gray-900' : 'text-gray-900 dark:text-gray-100'}`}>
                           {p.score1} – {p.score2}
                         </span>
                         {(() => {
                           const pts = calcPoints(p, match);
+                          const isMe = p.userId === user?.uid;
                           return pts !== null ? (
-                            <span className={`text-xs font-bold ${pts === 0 ? 'text-emerald-600' : 'text-amber-500'}`}>
+                            <span className={`text-xs font-bold ${
+                              pts === 0
+                                ? (isMe ? 'text-green-700' : 'text-emerald-600')
+                                : (isMe ? 'text-gray-700' : 'text-amber-500')
+                            }`}>
                               {pointsLabel(pts)}
                             </span>
                           ) : null;
