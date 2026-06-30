@@ -48,18 +48,27 @@ interface ApiMatch {
   score: {
     duration: 'REGULAR' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT';
     fullTime: ScoreEntry;
-    regularTime?: ScoreEntry;  // present when duration is EXTRA_TIME or PENALTY_SHOOTOUT
+    regularTime?: ScoreEntry;
+    extraTime?: ScoreEntry;
   };
 }
 
-// Returns the 90-minute score, ignoring extra time goals and penalty shootouts.
-// API sets fullTime = PSO score for PENALTY_SHOOTOUT and ET score for EXTRA_TIME;
-// regularTime holds the true 90-min result in both those cases.
-function regularTimeScore(m: ApiMatch): { home: number; away: number } | null {
-  const { regularTime, fullTime } = m.score;
-  const s = (regularTime?.home != null && regularTime?.away != null) ? regularTime : fullTime;
-  if (s.home === null || s.away === null) return null;
-  return { home: s.home, away: s.away };
+// Returns the final score excluding penalty shootout goals.
+// - REGULAR:            fullTime (90-min score)
+// - EXTRA_TIME:         fullTime (= regularTime + extraTime, already correct)
+// - PENALTY_SHOOTOUT:   regularTime + extraTime (fullTime includes PSO goals, so we sum manually)
+function finalScoreNoPSO(m: ApiMatch): { home: number; away: number } | null {
+  if (m.score.duration === 'PENALTY_SHOOTOUT') {
+    const rt = m.score.regularTime;
+    const et = m.score.extraTime;
+    if (rt?.home == null || rt?.away == null) return null;
+    const etHome = et?.home ?? 0;
+    const etAway = et?.away ?? 0;
+    return { home: rt.home + etHome, away: rt.away + etAway };
+  }
+  const { home, away } = m.score.fullTime;
+  if (home === null || away === null) return null;
+  return { home, away };
 }
 
 const GROUP_STAGE = 'GROUP_STAGE';
@@ -224,9 +233,9 @@ async function syncScores() {
   let scoresUpdated = 0;
   let teamsUpdated = 0;
 
-  // Update scores for all finished matches — use 90-min score only
+  // Update scores for all finished matches — exclude penalty shootout goals
   for (const m of finished) {
-    const score = regularTimeScore(m);
+    const score = finalScoreNoPSO(m);
     if (!score) continue;
 
     const matchId = String(m.id);
